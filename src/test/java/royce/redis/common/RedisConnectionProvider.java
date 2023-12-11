@@ -4,10 +4,8 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.RedisURI.Builder;
 import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.api.sync.RedisCommands;
 import java.util.Arrays;
-import java.util.concurrent.Future;
 
 public class RedisConnectionProvider {
 
@@ -34,22 +32,6 @@ public class RedisConnectionProvider {
 
     public static RedisCommands<String, String> getSync() {
         return redisConnection.sync();
-    }
-
-    public static int getConnectionCount(RedisAsyncCommands<String, String> asyncConnection) {
-        try {
-            Future<String> connected_clients = asyncConnection.info();
-            String infos = connected_clients.get();
-            String connectedClientsCount = Arrays.stream(infos.split(System.lineSeparator()))
-                    .filter(line -> line.startsWith("connected_clients"))
-                    .findAny().orElseThrow(); // result -> connected_clients:1
-
-            System.out.println(connectedClientsCount);
-            String connectedClientCount = connectedClientsCount.strip().split(":")[1];
-            return Integer.parseInt(connectedClientCount);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static int getConnectionCount(RedisCommands<String, String> syncConnection) {
